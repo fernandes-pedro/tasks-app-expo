@@ -2,14 +2,17 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather, AntDesign } from '@expo/vector-icons';
 import { TaskItem as TaskType } from '../utils/handle-api';
+
+// Conexão com a Store do Zustand
 import { useTaskStore } from '../store/taskStore';
 
 interface TaskItemProps {
   task: TaskType;
-  onEdit: () => void; // Mantido para disparar a abertura do modal controlado no App.tsx
+  onEdit: () => void;
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit }) => {
+  // Pegando a action de remoção direto do Zustand
   const removeTask = useTaskStore((state) => state.removeTask);
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0));
 
@@ -29,6 +32,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit }) => {
         <TouchableOpacity onPress={onEdit} accessibilityRole="button">
           <Feather name="edit" size={20} color="#fff" style={styles.icon} />
         </TouchableOpacity>
+        
+        {/* Alterado: Agora chama o removeTask passando o ID correto para a API */}
         <TouchableOpacity onPress={() => removeTask(task._id)} accessibilityRole="button">
           <AntDesign name="delete" size={20} color="#fff" style={styles.icon} />
         </TouchableOpacity>

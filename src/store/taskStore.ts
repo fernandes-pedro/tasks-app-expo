@@ -50,6 +50,7 @@ export const useTaskStore = create<TaskState>((set) => ({
     });
   },
 
+
   clearAllTasks: () => {
     set({ tasks: [] });
   },
