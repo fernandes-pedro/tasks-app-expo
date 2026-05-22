@@ -10,7 +10,10 @@ export interface TaskItem {
   dueDate?: string;
 }
 
-export const getAllTasks = (setTasks: React.Dispatch<React.SetStateAction<TaskItem[]>>, setLoading?: React.Dispatch<React.SetStateAction<boolean>>) => {
+export const getAllTasks = (
+  setTasks: React.Dispatch<React.SetStateAction<TaskItem[]>>, 
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
+) => {
   if (setLoading) setLoading(true);
   axios.get<TaskItem[]>(`${baseURL}`).then(({ data }) => {
     setTasks(data);

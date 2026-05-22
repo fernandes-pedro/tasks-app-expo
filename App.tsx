@@ -4,19 +4,20 @@ import { StatusBar } from 'expo-status-bar';
 import Checkbox from 'expo-checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import TaskList from './src/components/TaskList';
-import { addTask, deleteTask, getAllTasks, updateTask, TaskItem } from './src/utils/handle-api';
+import { updateTask, deleteTask } from './src/utils/handle-api';
 import { globalStyles } from './src/styles/global';
 import AboutScreen from './src/components/AboutScreen';
 
-// TODO (Zustand): Importe o seu useTaskStore aqui
+// Conexão com a Store do Zustand
+import { useTaskStore } from './src/store/taskStore';
 
 export default function App() {
-  // TODO (Zustand): Remova este useState e utilize o seletor da sua store para pegar as tasks
-  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  // Estado global vindo do Zustand
+  const { tasks, loading, fetchTasks, createTask } = useTaskStore();
+
   const [text, setText] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [taskId, setTaskId] = useState("");
-  const [loading, setLoading] = useState(true);
   const [logoError, setLogoError] = useState(false);
   const [filter, setFilter] = useState<'all' | 'completed' | 'pending'>('all');
 
@@ -28,8 +29,8 @@ export default function App() {
   const [priority, setPriority] = useState<'Baixa' | 'Média' | 'Alta'>('Baixa');
 
   useEffect(() => {
-    // TODO (Zustand): Atualize esta chamada para usar a action correspondente da store
-    getAllTasks(setTasks, setLoading);
+    // Busca inicial de tarefas utilizando Zustand
+    fetchTasks();
   }, []);
 
   const resetForm = () => {
@@ -42,7 +43,7 @@ export default function App() {
     setModalVisible(false);
   };
 
-  const updateMode = (task: TaskItem) => {
+  const updateMode = (task: any) => {
     setIsUpdating(true);
     setTaskId(task._id);
     setText(task.text);
@@ -54,11 +55,11 @@ export default function App() {
   const handleSave = () => {
     const formattedDate = dueDate ? dueDate.toISOString() : null;
     if (isUpdating) {
-      // TODO (Zustand): Substitua a chamada abaixo pela action de atualizar da sua store
-      updateTask(taskId, text, completed, formattedDate, setTasks, resetForm);
+      // Deixado temporariamente para a próxima questão (Editar)
+      // updateTask(taskId, text, completed, formattedDate, setTasks, resetForm);
     } else {
-      // TODO (Zustand): Substitua a chamada abaixo pela action de adicionar da sua store
-      addTask(text, completed, formattedDate, setTasks, resetForm);
+      // Resolvido: Criação utilizando Zustand
+      createTask(text, completed, formattedDate, resetForm);
     }
   };
 
@@ -126,8 +127,7 @@ export default function App() {
               styles.deleteButton,
               pressed && styles.deleteButtonPressed
             ]}
-            // TODO (Zustand): Chame a action de deletar todas as tarefas da sua store
-            onPress={() => setTasks([])} 
+            onPress={() => {}} 
           >
             <Text style={styles.actionButtonText}>Excluir todas</Text>
           </Pressable>
@@ -137,7 +137,6 @@ export default function App() {
           <Button title="Sobre o App" onPress={() => setAboutModalVisible(true)} />
         </View>
 
-        {/* TODO (Zustand): Remova as props tasks, onUpdate e onDelete após refatorar o TaskList */}
         <TaskList 
           tasks={tasks.filter(t => {
             if (filter === 'completed') return t.completed;
@@ -145,7 +144,7 @@ export default function App() {
             return true;
           })} 
           onUpdate={updateMode} 
-          onDelete={(id) => deleteTask(id, setTasks)} 
+          onDelete={(id) => {}} 
         />
 
         {loading && (
