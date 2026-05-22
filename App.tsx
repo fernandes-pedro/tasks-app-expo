@@ -4,7 +4,6 @@ import { StatusBar } from 'expo-status-bar';
 import Checkbox from 'expo-checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import TaskList from './src/components/TaskList';
-import { updateTask, deleteTask } from './src/utils/handle-api';
 import { globalStyles } from './src/styles/global';
 import AboutScreen from './src/components/AboutScreen';
 
@@ -12,8 +11,8 @@ import AboutScreen from './src/components/AboutScreen';
 import { useTaskStore } from './src/store/taskStore';
 
 export default function App() {
-  // Estado global vindo do Zustand
-  const { tasks, loading, fetchTasks, createTask } = useTaskStore();
+  // Estado global vindo do Zustand com todas as actions necessárias
+  const { tasks, loading, fetchTasks, createTask, updateTaskInStore, clearAllTasks } = useTaskStore();
 
   const [text, setText] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
@@ -55,10 +54,10 @@ export default function App() {
   const handleSave = () => {
     const formattedDate = dueDate ? dueDate.toISOString() : null;
     if (isUpdating) {
-      // Deixado temporariamente para a próxima questão (Editar)
-      // updateTask(taskId, text, completed, formattedDate, setTasks, resetForm);
+      // Alterado: Agora utiliza a action correspondente da Store do Zustand
+      updateTaskInStore(taskId, text, completed, formattedDate, resetForm);
     } else {
-      // Resolvido: Criação utilizando Zustand
+      // Criação utilizando Zustand
       createTask(text, completed, formattedDate, resetForm);
     }
   };
@@ -127,7 +126,8 @@ export default function App() {
               styles.deleteButton,
               pressed && styles.deleteButtonPressed
             ]}
-            onPress={() => {}} 
+            // Alterado: Agora o botão dispara a action de limpar todas as tarefas
+            onPress={clearAllTasks} 
           >
             <Text style={styles.actionButtonText}>Excluir todas</Text>
           </Pressable>
@@ -137,6 +137,7 @@ export default function App() {
           <Button title="Sobre o App" onPress={() => setAboutModalVisible(true)} />
         </View>
 
+        {/* Alterado: Passando os parâmetros limpos para a nova estrutura do TaskList */}
         <TaskList 
           filter={filter}
           onEdit={updateMode} 

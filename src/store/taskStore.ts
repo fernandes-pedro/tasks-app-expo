@@ -8,6 +8,7 @@ interface TaskState {
   createTask: (text: string, completed: boolean, dueDate: string | null, onSuccess: () => void) => Promise<void>;
   updateTaskInStore: (taskId: string, text: string, completed: boolean, dueDate: string | null, onSuccess: () => void) => Promise<void>;
   removeTask: (taskId: string) => Promise<void>;
+  clearAllTasks: () => void; // Nova action adicionada
 }
 
 export const useTaskStore = create<TaskState>((set) => ({
@@ -35,7 +36,6 @@ export const useTaskStore = create<TaskState>((set) => ({
     }, onSuccess);
   },
 
-  // Preparado para a próxima etapa (Atualizar)
   updateTaskInStore: async (taskId, text, completed, dueDate, onSuccess) => {
     updateTask(taskId, text, completed, dueDate, (tasksAction) => {
       const nextTasks = typeof tasksAction === 'function' ? tasksAction([]) : tasksAction;
@@ -43,11 +43,14 @@ export const useTaskStore = create<TaskState>((set) => ({
     }, onSuccess);
   },
 
-  // Preparado para a etapa de exclusão
   removeTask: async (taskId) => {
     deleteTask(taskId, (tasksAction) => {
       const nextTasks = typeof tasksAction === 'function' ? tasksAction([]) : tasksAction;
       set({ tasks: nextTasks });
     });
+  },
+
+  clearAllTasks: () => {
+    set({ tasks: [] });
   },
 }));
