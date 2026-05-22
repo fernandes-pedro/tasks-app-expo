@@ -1,11 +1,13 @@
 import { create } from 'zustand';
-import { TaskItem, getAllTasks, addTask } from '../utils/handle-api';
+import { TaskItem, getAllTasks, addTask, deleteTask, updateTask } from '../utils/handle-api';
 
 interface TaskState {
   tasks: TaskItem[];
   loading: boolean;
   fetchTasks: () => Promise<void>;
   createTask: (text: string, completed: boolean, dueDate: string | null, onSuccess: () => void) => Promise<void>;
+  updateTaskInStore: (taskId: string, text: string, completed: boolean, dueDate: string | null, onSuccess: () => void) => Promise<void>;
+  removeTask: (taskId: string) => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>((set) => ({
@@ -14,7 +16,6 @@ export const useTaskStore = create<TaskState>((set) => ({
 
   fetchTasks: async () => {
     set({ loading: true });
-    // Usamos a função do handle-api para atualizar o estado da store
     getAllTasks(
       (tasksAction) => {
         const nextTasks = typeof tasksAction === 'function' ? tasksAction([]) : tasksAction;
@@ -32,5 +33,21 @@ export const useTaskStore = create<TaskState>((set) => ({
       const nextTasks = typeof tasksAction === 'function' ? tasksAction([]) : tasksAction;
       set({ tasks: nextTasks });
     }, onSuccess);
+  },
+
+  // Preparado para a próxima etapa (Atualizar)
+  updateTaskInStore: async (taskId, text, completed, dueDate, onSuccess) => {
+    updateTask(taskId, text, completed, dueDate, (tasksAction) => {
+      const nextTasks = typeof tasksAction === 'function' ? tasksAction([]) : tasksAction;
+      set({ tasks: nextTasks });
+    }, onSuccess);
+  },
+
+  // Preparado para a etapa de exclusão
+  removeTask: async (taskId) => {
+    deleteTask(taskId, (tasksAction) => {
+      const nextTasks = typeof tasksAction === 'function' ? tasksAction([]) : tasksAction;
+      set({ tasks: nextTasks });
+    });
   },
 }));

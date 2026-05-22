@@ -138,13 +138,8 @@ export default function App() {
         </View>
 
         <TaskList 
-          tasks={tasks.filter(t => {
-            if (filter === 'completed') return t.completed;
-            if (filter === 'pending') return !t.completed;
-            return true;
-          })} 
-          onUpdate={updateMode} 
-          onDelete={(id) => {}} 
+          filter={filter}
+          onEdit={updateMode} 
         />
 
         {loading && (

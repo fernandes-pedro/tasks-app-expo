@@ -1,26 +1,34 @@
 import React, { useMemo } from 'react';
 import { SectionList, StyleSheet, View, Text } from 'react-native';
 import TaskItem from './TaskItem';
+import { useTaskStore } from '../store/taskStore';
 import { TaskItem as TaskType } from '../utils/handle-api';
 
-// TODO (Zustand): Remova as props tasks, onUpdate e onDelete daqui, elas não serão mais necessárias
 interface TaskListProps {
-  tasks: TaskType[];
-  onUpdate: (task: TaskType) => void;
-  onDelete: (id: string) => void;
+  onEdit: (task: TaskType) => void;
+  filter: 'all' | 'completed' | 'pending';
 }
 
-// TODO (Zustand): Importe o useTaskStore e pegue as tasks diretamente da store
-const TaskList: React.FC<TaskListProps> = ({ tasks, onUpdate, onDelete }) => {
+const TaskList: React.FC<TaskListProps> = ({ onEdit, filter }) => {
+  // Pegando as tasks diretamente da Store global do Zustand
+  const tasks = useTaskStore((state) => state.tasks);
+
   const sections = useMemo(() => {
-    const completedTasks = tasks.filter((task) => task.completed);
-    const pendingTasks = tasks.filter((task) => !task.completed);
+    // Aplica o filtro selecionado no topo do App antes de separar por seções
+    const filteredTasks = tasks.filter(t => {
+      if (filter === 'completed') return t.completed;
+      if (filter === 'pending') return !t.completed;
+      return true;
+    });
+
+    const completedTasks = filteredTasks.filter((task) => task.completed);
+    const pendingTasks = filteredTasks.filter((task) => !task.completed);
 
     return [
-      { title: '✅ Concluídas', data: completedTasks },
       { title: '📋 Pendentes', data: pendingTasks },
+      { title: '✅ Concluídas', data: completedTasks },
     ];
-  }, [tasks]);
+  }, [tasks, filter]);
 
   return (
     <View style={styles.listContainer}>
@@ -32,11 +40,9 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onUpdate, onDelete }) => {
           <Text style={styles.sectionHeader}>{title}</Text>
         )}
         renderItem={({ item }) => (
-          
           <TaskItem
             task={item}
-            updateMode={() => onUpdate(item)}
-            deleteTask={() => onDelete(item._id)}
+            onEdit={() => onEdit(item)}
           />
         )}
         renderSectionFooter={({ section }) => 
