@@ -68,7 +68,7 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className="flex-1 bg-slate-200">
       <View style={styles.container}>
         <View style={styles.headerContainer}>
           {logoError ? (
@@ -265,11 +265,6 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: globalStyles.backgroundColor,
-    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
-  },
   container: {
     flex: 1,
     maxWidth: 600,
