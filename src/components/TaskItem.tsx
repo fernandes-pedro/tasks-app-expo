@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather, AntDesign } from '@expo/vector-icons';
 import { TaskItem as TaskType } from '../utils/handle-api';
+import { AlertDialog, AlertDialogBackdrop, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter } from '@gluestack-ui/react';
 
 // Conexão com a Store do Zustand
 import { useTaskStore } from '../store/taskStore';
@@ -14,31 +15,58 @@ interface TaskItemProps {
 const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit }) => {
   // Pegando a action de remoção direto do Zustand
   const removeTask = useTaskStore((state) => state.removeTask);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0));
 
+  const handleDeleteConfirm = () => {
+    removeTask(task._id);
+    setIsAlertOpen(false);
+  };
+
   return (
-    <View style={styles.task}>
-      <View style={styles.contentContainer}>
-        <Text style={[styles.text, !!task.completed && styles.textCompleted]}>
-          {task.text}
-        </Text>
-        {task.dueDate && (
-          <Text style={[styles.dateText, isOverdue ? styles.dateOverdue : styles.dateOnTime]}>
-            Até: {new Date(task.dueDate).toLocaleDateString()}
+    <>
+      <View style={styles.task}>
+        <View style={styles.contentContainer}>
+          <Text style={[styles.text, !!task.completed && styles.textCompleted]}>
+            {task.text}
           </Text>
-        )}
+          {task.dueDate && (
+            <Text style={[styles.dateText, isOverdue ? styles.dateOverdue : styles.dateOnTime]}>
+              Até: {new Date(task.dueDate).toLocaleDateString()}
+            </Text>
+          )}
+        </View>
+        <View style={styles.icons}>
+          <TouchableOpacity onPress={onEdit} accessibilityRole="button">
+            <Feather name="edit" size={20} color="#fff" style={styles.icon} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity onPress={() => setIsAlertOpen(true)} accessibilityRole="button">
+            <AntDesign name="delete" size={20} color="#fff" style={styles.icon} />
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.icons}>
-        <TouchableOpacity onPress={onEdit} accessibilityRole="button">
-          <Feather name="edit" size={20} color="#fff" style={styles.icon} />
-        </TouchableOpacity>
-        
-        {/* Alterado: Agora chama o removeTask passando o ID correto para a API */}
-        <TouchableOpacity onPress={() => removeTask(task._id)} accessibilityRole="button">
-          <AntDesign name="delete" size={20} color="#fff" style={styles.icon} />
-        </TouchableOpacity>
-      </View>
-    </View>
+
+      <AlertDialog isOpen={isAlertOpen} onClose={() => setIsAlertOpen(false)}>
+        <AlertDialogBackdrop />
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <Text style={styles.alertTitle}>Confirmar exclusão</Text>
+          </AlertDialogHeader>
+          <AlertDialogBody>
+            <Text style={styles.alertMessage}>Tem certeza que deseja excluir esta tarefa?</Text>
+          </AlertDialogBody>
+          <AlertDialogFooter style={styles.alertFooter}>
+            <TouchableOpacity style={styles.alertCancelButton} onPress={() => setIsAlertOpen(false)}>
+              <Text style={styles.alertCancelText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.alertDeleteButton} onPress={handleDeleteConfirm}>
+              <Text style={styles.alertDeleteText}>Excluir</Text>
+            </TouchableOpacity>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
@@ -82,6 +110,42 @@ const styles = StyleSheet.create({
   },
   icon: {
     padding: 2,
+  },
+  alertTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  alertMessage: {
+    fontSize: 16,
+    color: '#333',
+  },
+  alertFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+    marginTop: 16,
+  },
+  alertCancelButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#999',
+  },
+  alertCancelText: {
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  alertDeleteButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    backgroundColor: '#d32f2f',
+  },
+  alertDeleteText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 
