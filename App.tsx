@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, Platform, StatusBar as RNStatusBar, Image, Pressable, ActivityIndicator, Modal, Button } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Platform, StatusBar as RNStatusBar, Image, Pressable, ActivityIndicator, Modal, Button as RNButton } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { GluestackUIProvider, Input as InputField, Button, ButtonText } from '@gluestack-ui/react';
 import Checkbox from 'expo-checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import TaskList from './src/components/TaskList';
@@ -68,8 +69,9 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-200">
-      <View style={styles.container}>
+    <GluestackUIProvider>
+      <SafeAreaView className="flex-1 bg-slate-200">
+        <View style={styles.container}>
         <View style={styles.headerContainer}>
           {logoError ? (
             <Text style={styles.header}>Gerenciador de Tarefas</Text>
@@ -109,16 +111,9 @@ export default function App() {
         </View>
 
         <View style={styles.actionButtonsContainer}>
-          <Pressable 
-            style={({ pressed }) => [
-              styles.actionButton,
-              styles.actionButtonAdd,
-              pressed && styles.actionButtonAddPressed
-            ]}
-            onPress={() => setModalVisible(true)}
-          >
-            <Text style={styles.actionButtonText}>Nova Tarefa</Text>
-          </Pressable>
+          <Button style={[styles.actionButton, styles.actionButtonAdd]} onPress={() => setModalVisible(true)}>
+            <ButtonText style={styles.actionButtonText}>Nova Tarefa</ButtonText>
+          </Button>
 
           <Pressable 
             style={({ pressed }) => [
@@ -160,7 +155,7 @@ export default function App() {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{isUpdating ? "Editar Tarefa" : "Nova Tarefa"}</Text>
             
-            <TextInput
+            <InputField
               style={styles.modalInput}
               placeholder="Nome da tarefa..."
               value={text}
