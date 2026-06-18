@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { SectionList, StyleSheet, View, Text } from 'react-native';
 import TaskItem from './TaskItem';
+import EmptyState from './EmptyState';
 import { useTaskStore } from '../store/taskStore';
 import { TaskItem as TaskType } from '../utils/handle-api';
 
@@ -13,14 +14,15 @@ const TaskList: React.FC<TaskListProps> = ({ onEdit, filter }) => {
   // Pegando as tasks diretamente da Store global do Zustand
   const tasks = useTaskStore((state) => state.tasks);
 
-  const sections = useMemo(() => {
-    // Aplica o filtro selecionado no topo do App antes de separar por seções
-    const filteredTasks = tasks.filter(t => {
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((t) => {
       if (filter === 'completed') return t.completed;
       if (filter === 'pending') return !t.completed;
       return true;
     });
+  }, [tasks, filter]);
 
+  const sections = useMemo(() => {
     const completedTasks = filteredTasks.filter((task) => task.completed);
     const pendingTasks = filteredTasks.filter((task) => !task.completed);
 
@@ -28,7 +30,11 @@ const TaskList: React.FC<TaskListProps> = ({ onEdit, filter }) => {
       { title: '📋 Pendentes', data: pendingTasks },
       { title: '✅ Concluídas', data: completedTasks },
     ];
-  }, [tasks, filter]);
+  }, [filteredTasks]);
+
+  if (filteredTasks.length === 0) {
+    return <EmptyState />;
+  }
 
   return (
     <View style={styles.listContainer}>
